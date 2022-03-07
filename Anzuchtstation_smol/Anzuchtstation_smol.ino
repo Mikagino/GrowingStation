@@ -9,10 +9,10 @@
 #define debug(x)
 #endif
 
-#define DHT_SAMPLING 3000
-#define LOOP_DELAY 10000
-#define PUMP_HOURS_DELAY 0
-#define PUMP_AMOUNT_DELAY 5000
+//#define DHT_SAMPLING 3000
+//#define LOOP_DELAY 10000
+//#define PUMP_HOURS_DELAY 0
+//#define PUMP_AMOUNT_DELAY 5000
 
 // # Input-/Output-Pins in struct for better overview #
 struct GPIO {
@@ -29,27 +29,18 @@ struct Messages{
 };
 
 
-struct Measurements{
-  int temperature;
-  int humidity;
-  int soilHumidity;
-
-  unsigned long lastPump;
-  
-  Measurements(){
-    temperature = 0;
-    humidity = 0;
-    soilHumidity = 0;
-    lastPump = PUMP_HOURS_DELAY;
-  }
-};
+// # measurements #
+int temperature = 0;
+unsigned int humidity = 0;
+unsigned int soilHumidity = 0;
+unsigned long lastPump = PUMP_HOURS_DELAY;
 
 
-// - Structs -
+// # Structs #
 struct GPIO gpio;
 struct Messages msg;
 struct Measurements meas;
-// - Objects -
+// # Objects #
 DHTesp dht;
 GrowingStation_smol gsm;
 
@@ -64,10 +55,6 @@ void setup() {
 
 void loop() {
   debugln(" - loop - ");
-  
-  meas.temperature = 0;
-  meas.humidity = 0;
-  meas.soilHumidity = 0;
 
   int errorCount = 0;
   do{

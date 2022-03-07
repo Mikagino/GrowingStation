@@ -5,9 +5,14 @@
 
 class GrowingStation_smol{
   private:
-  // - delays -
-  const unsigned long dht_sampling = 3000;
+  // - delays (most of them in milliseconds) -
+  unsigned long dht_sampling = 3000;
+  unsigned long loop_delay = 5000;
+  unsigned int watering_frequency = 24; // - how often it's watered (in hours) -
+  unsigned long watering_delay_amount = 5000;
 
+  // - measurements -
+  int temperature = 0;
   
   public:  
   int DHT_ReadTemperature(DHTesp dht);

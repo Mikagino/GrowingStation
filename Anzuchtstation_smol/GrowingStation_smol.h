@@ -14,7 +14,7 @@ class GrowingStation_smol{
   unsigned long dht_sampling = 1000;
   unsigned long loop_delay = 5000;
   unsigned int watering_frequencyH = 0; // - how often it's watered (in hours) -
-  unsigned long watering_delay_amount = 2000;
+  unsigned long watering_delay_amount = 5000;
 
   // - telegram bot -
   UniversalTelegramBot* telegramBot = NULL;

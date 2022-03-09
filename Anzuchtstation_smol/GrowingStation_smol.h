@@ -35,8 +35,8 @@ class GrowingStation_smol{
   unsigned int humidity = 0;
   unsigned int soilHumidity = 0;
 
-  void begin(const String newBotToken, String chatID);
-  int DHT_ReadTemperature(DHTesp dht);
-  int DHT_ReadHumidity(DHTesp dht);
+  void tg_begin(const String newBotToken, String chatID);
+  int dht_readTemperature(DHTesp dht);
+  int dht_readHumidity(DHTesp dht);
   int millisToHours(unsigned long millis);
 };

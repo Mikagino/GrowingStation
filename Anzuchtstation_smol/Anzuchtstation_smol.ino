@@ -12,16 +12,16 @@
 
 // # Input-/Output-Pins in struct for better overview #
 struct GPIO {
-  const unsigned int waterPump = 23;
-  const unsigned int soilSensor = 2;
-  // - DHT temp/humi sensors -
+	const unsigned int waterPump = 23;
+	const unsigned int soilSensor = 2;
+	// - DHT temp/humi sensors -
 #define DHT_PIN 32
 };
 
 
-struct Messages{
-  const String start = "Anzuchtstation rebooted...";
-  const String pumped = "Water pumped!";
+struct Messages {
+	const String start = "Anzuchtstation rebooted...";
+	const String pumped = "Water pumped!";
 };
 
 
@@ -42,44 +42,45 @@ GrowingStation_smol gsm;
 
 
 void setup() {
-  pinMode(gpio.waterPump, OUTPUT);
-  dht.setup(DHT_PIN, DHTesp::DHT11);
-  Serial.begin(9600);
-  debugln(" # Bot initialized # ");
+	pinMode(gpio.waterPump, OUTPUT);
+	dht.setup(DHT_PIN, DHTesp::DHT11);
+	Serial.begin(9600);
+	debugln(" # Bot initialized # ");
+	gsm.tg_begin(BOT_TOKEN, BOT_CHATID);
 }
 
 
 void loop() {
-  debugln(" - loop - ");
+	debugln(" - loop - ");
 
-  int errorCount = 0;
-  do{
-      debugln(" * measure * ");
-  
-    gsm.temperature = gsm.DHT_ReadTemperature(dht);
-    delay(gsm.dht_sampling);
-    gsm.humidity = gsm.DHT_ReadHumidity(dht);
-    delay(gsm.dht_sampling);
-    gsm.soilHumidity = analogRead(gpio.soilSensor);
-    if(gsm.temperature == DHT_ERROR || gsm.humidity == DHT_ERROR){
-      errorCount++;
-      debug("\nError reading DHT values - ErrorCount: "); debugln(errorCount);
-    }
-  } while(gsm.temperature == DHT_ERROR  || gsm.humidity == DHT_ERROR);
-  
-  debug("Air Temp: "); debug(gsm.temperature); debugln("°C");
-  debug("Air Humi: "); debug(gsm.humidity); debugln("%");
-  debug("Soil Humi: "); debug(gsm.soilHumidity); debugln(" (no unit yet)");
+	int errorCount = 0;
+	do {
+		debugln(" * measure * ");
 
-  int pumpTimeTreshold = gsm.millisToHours(millis()) - lastPump - gsm.watering_frequencyH;
-  
-  if(pumpTimeTreshold >= 0 && gsm.soilHumidity < 3000){
-    lastPump = gsm.millisToHours(millis());
-    digitalWrite(gpio.waterPump, 1);
-    debugln(" * Water pumped * ");
-    delay(gsm.watering_delay_amount);
-    digitalWrite(gpio.waterPump, 0);
-  }
-  
-  delay(gsm.loop_delay);
+		gsm.dht_readTemperature(dht);
+		delay(gsm.dht_sampling);
+		gsm.dht_readHumidity(dht);
+		delay(gsm.dht_sampling);
+		gsm.soilHumidity = analogRead(gpio.soilSensor);
+		if (gsm.temperature == DHT_ERROR || gsm.humidity == DHT_ERROR) {
+			errorCount++;
+			debug("\nError reading DHT values - ErrorCount: "); debugln(errorCount);
+		}
+	} while (gsm.temperature == DHT_ERROR || gsm.humidity == DHT_ERROR);
+
+	debug("Air Temp: "); debug(gsm.temperature); debugln("°C");
+	debug("Air Humi: "); debug(gsm.humidity); debugln("%");
+	debug("Soil Humi: "); debug(gsm.soilHumidity); debugln(" (no unit yet)");
+
+	int pumpTimeTreshold = gsm.millisToHours(millis()) - lastPump - gsm.watering_frequencyH;
+
+	if (pumpTimeTreshold >= 0 && gsm.soilHumidity < 3300) {
+		lastPump = gsm.millisToHours(millis());
+		digitalWrite(gpio.waterPump, 1);
+		debugln(" * Water pumped * ");
+		delay(gsm.watering_delay_amount);
+		digitalWrite(gpio.waterPump, 0);
+	}
+
+	delay(gsm.loop_delay);
 }

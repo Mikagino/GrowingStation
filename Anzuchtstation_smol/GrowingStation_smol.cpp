@@ -8,7 +8,7 @@
  *  
  *  RETURN:
  */
-void GrowingStation_smol::begin(const String newBotToken, String chatID) {
+void GrowingStation_smol::tg_begin(const String newBotToken, String chatID) {
   WiFiClientSecure sClient;
   UniversalTelegramBot bot = UniversalTelegramBot(newBotToken, sClient);
   telegramBot = &bot;
@@ -26,6 +26,11 @@ void GrowingStation_smol::begin(const String newBotToken, String chatID) {
 }
 
 
+void GrowingStation_smol::tg_read() {
+
+}
+
+
 
 /** DESCRIPTION: read temperature with an DHT11-sensor and store it to the private variable @temperature
  *  
@@ -36,7 +41,7 @@ void GrowingStation_smol::begin(const String newBotToken, String chatID) {
  *   int\{DHT_ERROR} -> temperature rounded to int
  *   DHT_ERROR -> on sensor failure
  */
-int GrowingStation_smol::DHT_ReadTemperature(DHTesp dht) {
+int GrowingStation_smol::dht_readTemperature(DHTesp dht) {
   temperature = round(dht.getTemperature());
 
   if (dht.getStatus() != 0) {
@@ -58,7 +63,7 @@ int GrowingStation_smol::DHT_ReadTemperature(DHTesp dht) {
  *   int\{-1} -> temperature rounded to int
  *   DHT_ERROR -> on sensor failure
  */
-int GrowingStation_smol::DHT_ReadHumidity(DHTesp dht) {
+int GrowingStation_smol::dht_readHumidity(DHTesp dht) {
   humidity = dht.getHumidity();
 
   if (dht.getStatus() != 0) {

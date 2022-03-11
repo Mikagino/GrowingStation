@@ -1,13 +1,13 @@
 #include "GrowingStation_smol.h"
 
-#define DEBUG
+/*#define DEBUG
 #ifdef DEBUG
 #define debugln(x) Serial.println(x)
 #define debug(x) Serial.print(x)
 #else
 #define debugln(x)
 #define debug(x)
-#endif
+#endif*/
 
 
 // # Input-/Output-Pins in struct for better overview #
@@ -45,17 +45,17 @@ void setup() {
 	pinMode(gpio.waterPump, OUTPUT);
 	dht.setup(DHT_PIN, DHTesp::DHT11);
 	Serial.begin(9600);
-	debugln(" # Bot initialized # ");
-	gsm.tg_begin(BOT_TOKEN, BOT_CHATID);
+	gsm.debugPrintln(" # Bot initialized # ");
+	gsm.begin(BOT_TOKEN, BOT_CHATID);
 }
 
 
 void loop() {
-	debugln(" - loop - ");
+	gsm.debugPrintln(" - loop - ");
 
 	int errorCount = 0;
 	do {
-		debugln(" * measure * ");
+		gsm.debugPrintln(" * measure * ");
 
 		gsm.dht_readTemperature(dht);
 		delay(gsm.dht_sampling);
@@ -64,20 +64,20 @@ void loop() {
 		gsm.soilHumidity = analogRead(gpio.soilSensor);
 		if (gsm.temperature == DHT_ERROR || gsm.humidity == DHT_ERROR) {
 			errorCount++;
-			debug("\nError reading DHT values - ErrorCount: "); debugln(errorCount);
+			gsm.debugPrint("\nError reading DHT values - ErrorCount: "); gsm.debugPrintln(errorCount);
 		}
 	} while (gsm.temperature == DHT_ERROR || gsm.humidity == DHT_ERROR);
 
-	debug("Air Temp: "); debug(gsm.temperature); debugln("°C");
-	debug("Air Humi: "); debug(gsm.humidity); debugln("%");
-	debug("Soil Humi: "); debug(gsm.soilHumidity); debugln(" (no unit yet)");
+	gsm.debugPrint("Air Temp: "); gsm.debugPrint(gsm.temperature); gsm.debugPrintln("°C");
+	gsm.debugPrint("Air Humi: "); gsm.debugPrint(gsm.humidity); gsm.debugPrintln("%");
+	gsm.debugPrint("Soil Humi: "); gsm.debugPrint(gsm.soilHumidity); gsm.debugPrintln(" (no unit yet)");
 
 	int pumpTimeTreshold = gsm.millisToHours(millis()) - lastPump - gsm.watering_frequencyH;
 
 	if (pumpTimeTreshold >= 0 && gsm.soilHumidity < 3300) {
 		lastPump = gsm.millisToHours(millis());
 		digitalWrite(gpio.waterPump, 1);
-		debugln(" * Water pumped * ");
+		gsm.debugPrintln(" * Water pumped * ");
 		delay(gsm.watering_delay_amount);
 		digitalWrite(gpio.waterPump, 0);
 	}

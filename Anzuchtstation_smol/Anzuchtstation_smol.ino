@@ -50,35 +50,38 @@ void setup() {
 }
 
 
+
 void loop() {
 	gsm.debugPrintln(" - loop - ");
 
+  // - measure temperature, humidity and soil-humidity until the dht returns no error -
 	int errorCount = 0;
 	do {
 		gsm.debugPrintln(" * measure * ");
-
 		gsm.dht_readTemperature(dht);
-		delay(gsm.dht_sampling);
 		gsm.dht_readHumidity(dht);
-		delay(gsm.dht_sampling);
 		gsm.soilHumidity = analogRead(gpio.soilSensor);
+   
 		if (gsm.temperature == DHT_ERROR || gsm.humidity == DHT_ERROR) {
 			errorCount++;
 			gsm.debugPrint("\nError reading DHT values - ErrorCount: "); gsm.debugPrintln(errorCount);
 		}
+   
 	} while (gsm.temperature == DHT_ERROR || gsm.humidity == DHT_ERROR);
 
+  // - print out all the measurements -
 	gsm.debugPrint("Air Temp: "); gsm.debugPrint(gsm.temperature); gsm.debugPrintln("°C");
 	gsm.debugPrint("Air Humi: "); gsm.debugPrint(gsm.humidity); gsm.debugPrintln("%");
 	gsm.debugPrint("Soil Humi: "); gsm.debugPrint(gsm.soilHumidity); gsm.debugPrintln(" (no unit yet)");
 
+  // - pump water when @soilHumidity is over @watering_treshold and only all @watering_frequencyH hours -
 	int pumpTimeTreshold = gsm.millisToHours(millis()) - lastPump - gsm.watering_frequencyH;
 
-	if (pumpTimeTreshold >= 0 && gsm.soilHumidity < 3300) {
+	if (pumpTimeTreshold >= 0 && gsm.soilHumidity < gsm.watering_treshold) {
 		lastPump = gsm.millisToHours(millis());
 		digitalWrite(gpio.waterPump, 1);
 		gsm.debugPrintln(" * Water pumped * ");
-		delay(gsm.watering_delay_amount);
+		delay(gsm.watering_amount);
 		digitalWrite(gpio.waterPump, 0);
 	}
 

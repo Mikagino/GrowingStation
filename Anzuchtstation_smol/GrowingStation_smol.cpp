@@ -129,6 +129,7 @@ bool GrowingStation_smol::isChatID(String chatID){
  *   DHT_ERROR -> on sensor failure
  */
 int GrowingStation_smol::dht_readTemperature(DHTesp dht) {
+  _dhtDelay();
   temperature = round(dht.getTemperature());
 
   if (dht.getStatus() != 0) {
@@ -152,6 +153,7 @@ int GrowingStation_smol::dht_readTemperature(DHTesp dht) {
  *   DHT_ERROR -> on sensor failure
  */
 int GrowingStation_smol::dht_readHumidity(DHTesp dht) {
+  _dhtDelay();
   humidity = dht.getHumidity();
 
   if (dht.getStatus() != 0) {
@@ -164,17 +166,14 @@ int GrowingStation_smol::dht_readHumidity(DHTesp dht) {
 
 
 
-/** 
- *  DESCRIPTION: convert milliseconds to rounded hours
- *  
- *  PARAM: 
- *    @millis -> milliseconds that will be calculated to hours
- *  
- *  RETURN:
- *   milliseconds converted to hours
+/** # PRIVATE # *  
+ *  DESCRIPTION: loop until the dht is allowed to measure
  */
-int GrowingStation_smol::millisToHours(unsigned long millis){
-  return round(millis/1000/60/60);
+void GrowingStation_smol::_dhtDelay(){
+  while(_lastDhtRead + dht_sampling > millis()){
+    delay(50);
+  }
+  _lastDhtRead = millis();
 }
 
 
@@ -295,4 +294,29 @@ bool GrowingStation_smol::debugPrint(int number){
   else{
     return false;
   }
+}
+
+
+
+
+
+/*################################################################################
+ * #---# MISCELLANEOUS #---#
+ * 
+ * all other methods
+ *################################################################################
+*/
+
+
+/** 
+ *  DESCRIPTION: convert milliseconds to  hours
+ *  
+ *  PARAM: 
+ *    @millis -> milliseconds that will be calculated to hours
+ *  
+ *  RETURN:
+ *   milliseconds converted to hours
+ */
+float GrowingStation_smol::millisToHours(unsigned long millis){
+  return millis/1000/60/60;
 }

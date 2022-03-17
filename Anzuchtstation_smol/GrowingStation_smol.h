@@ -14,6 +14,7 @@
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 
+
 #define DHT_ERROR -173
 
 
@@ -55,21 +56,35 @@
 
 class GrowingStation_smol{
   private:
+    // +--+ dht +--+
+    unsigned long _lastDhtRead = 0;
+    #define DHT11_SAMPLING 1000;
+    #define DHT22_SAMPLING 2000;
+
+  // #---# DHT-SENSOR #---#
+  // #- various methods and functions for using the DHT-sensor -#
+    void _dhtDelay();    
+
+
   
   public:
-  // - system -
+  // +--+ system +--+
   bool debug = true;
-  
-  // - delays (most of them in milliseconds) -
-  unsigned long dht_sampling = 1000;
-  unsigned long loop_delay = 5000;
-  unsigned int watering_frequencyH = 0; // - how often it's watered (in hours) -
-  unsigned long watering_delay_amount = 5000;
 
-  // - telegram bot -
+  
+  // +--+ delays (most of them in milliseconds) +--+
+  unsigned long dht_sampling = 1000; // - delay between dht reading -
+  unsigned long loop_delay = 5000; // - delay between entire loops -
+  unsigned int watering_frequencyH = 0; // - how often it's watered (in hours) -
+  unsigned long watering_amount = 10000; // - how long the pump is activated for watering
+  unsigned long watering_treshold = 3300; // - on what soilHumidity the pump will be activated -
+
+
+  // +--+ telegram bot +--+
   UniversalTelegramBot* telegramBot = NULL;
 
-  // - users -
+
+  // +--+ users +--+
   String userSTD = "XXXXXXXXX";
   String user1;
   String user2;
@@ -79,26 +94,27 @@ class GrowingStation_smol{
   #define USER_MAX 5
   String* users[USER_MAX];
   unsigned int userCount = 0;
+
   
   // - measurements -
   int temperature = 0;
   unsigned int humidity = 0;
   unsigned int soilHumidity = 0;
 
+  
   // #---# TELEGRAM BOT #---#
   // #- various methods and functions for using the telegram bot -#
   void begin(const String newBotToken, String chatID);
   bool sendingLoop(String text, String *chatID, unsigned int reps = 5);
   void handleMessages(unsigned int messageCount = 1);
   bool isChatID(String chatID);
+
   
   // #---# DHT-SENSOR #---#
   // #- various methods and functions for using the DHT-sensor -#
   int dht_readTemperature(DHTesp dht);
   int dht_readHumidity(DHTesp dht);
-  
-  // - other functions/methods -
-  int millisToHours(unsigned long millis);
+
 
   // #---# DEBUGGING/SERIAL #---#
   // #- various methods and functions about serial port checks, serial printing usw. -#
@@ -107,4 +123,9 @@ class GrowingStation_smol{
   bool debugPrint(const char* text);
   bool debugPrintln(int number);
   bool debugPrint(int number);
+
+  
+  // #---# MISCELLANEOUS #---#
+  // #- various methods and functions about serial port checks, serial printing usw. -#
+  float millisToHours(unsigned long millis);
 };

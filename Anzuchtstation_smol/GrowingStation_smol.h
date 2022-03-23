@@ -15,7 +15,7 @@
 #include <WiFiClientSecure.h>
 
 
-#define DHT_ERROR -173
+#define DHT_ERROR -273
 
 
 // #---# Bot commands #---#
@@ -75,8 +75,8 @@ class GrowingStation_smol{
   // +--+ delays (most of them in milliseconds) +--+
   unsigned long dht_sampling = 1000; // - delay between dht reading -
   unsigned long loop_delay = 5000; // - delay between entire loops -
-  unsigned int watering_frequencyH = 0; // - how often it's watered (in hours) -
-  unsigned long watering_amount = 10000; // - how long the pump is activated for watering
+  unsigned int watering_frequencyH = 24; // - how often it's watered (in hours) -
+  unsigned long watering_amount = 5000; // - how long the pump is activated for watering
   unsigned long watering_treshold = 3300; // - on what soilHumidity the pump will be activated -
 
 

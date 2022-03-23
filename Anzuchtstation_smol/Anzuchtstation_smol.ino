@@ -47,6 +47,12 @@ void setup() {
 	Serial.begin(9600);
 	gsm.debugPrintln(" # Bot initialized # ");
 	gsm.begin(BOT_TOKEN, BOT_CHATID);
+
+  // - initial serial reading (if not done, measurements won't be correct the first times) -
+  for(int i = 0; i < 3; i++){
+    gsm.soilHumidity = analogRead(gpio.soilSensor);
+    delay(3000);
+  }
 }
 
 

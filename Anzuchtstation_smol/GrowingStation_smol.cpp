@@ -196,7 +196,7 @@ void GrowingStation_smol::_dhtDelay(){
  *   false -> Serial port is unaccessable
  */
 bool GrowingStation_smol::debugAvailable(){
-  if(Serial.available() && debug){
+  if(/*Serial.available() &&*/ debug){
     return true;
   }
   else{

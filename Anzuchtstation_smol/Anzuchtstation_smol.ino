@@ -83,7 +83,7 @@ void loop() {
   // - pump water when @soilHumidity is over @watering_treshold and only all @watering_frequencyH hours -
 	int pumpTimeTreshold = gsm.millisToHours(millis()) - lastPump - gsm.watering_frequencyH;
 
-	if (pumpTimeTreshold >= 0 && gsm.soilHumidity < gsm.watering_treshold) {
+	if (pumpTimeTreshold >= 0 && gsm.soilHumidity > gsm.watering_treshold) {
 		lastPump = gsm.millisToHours(millis());
 		digitalWrite(gpio.waterPump, 1);
 		gsm.debugPrintln(" * Water pumped * ");

@@ -17,6 +17,12 @@
 
 #define DHT_ERROR -273
 
+typedef const int TG_SENDING;
+TG_SENDING SUCCESS = 1;
+TG_SENDING SENDING_ERROR = -1;
+TG_SENDING INVALID_USER = -2;
+TG_SENDING BOT_NOT_SETUP = -3;
+
 
 // #---# Bot commands #---#
 // #- Comment following line if you want to use G-Codes -#
@@ -56,24 +62,39 @@
 
 class GrowingStation_smol{
   private:
-    // +--+ dht +--+
-    unsigned long _lastDhtRead = 0;
-    #define DHT11_SAMPLING 1000;
-    #define DHT22_SAMPLING 2000;
 
   // #---# DHT-SENSOR #---#
-  // #- various methods and functions for using the DHT-sensor -#
-    void _dhtDelay();    
+  // #- various methods, functions and variables for using the DHT-sensor -#
+      unsigned long _lastDhtRead = 0;
+#define DHT11_SAMPLING 1000;
+#define DHT22_SAMPLING 2000;
+    void _dhtDelay();
+
+
+  // #---# Commands #---#
+  // #- various methods, functions and variables for the telegram commands -#
+    String _commandSTD = "XXXXXXXXXXXXXXXXXXXX";
+    String _paramSTD = "XXXXX";
+    String _command;
+    String _param1;
+    String _param2;
+    String _param3;
+#define COMMAND_MAX 4
+    String* _fullCommand[COMMAND_MAX];
+
+    void _tg_resetCommand();
+
 
 
   
   public:
+
   // +--+ system +--+
   bool debug = true;
 
   
   // +--+ delays (most of them in milliseconds) +--+
-  unsigned long dht_sampling = 1000; // - delay between dht reading -
+  unsigned long dht_sampling = DHT11_SAMPLING; // - delay between dht reading -
   unsigned long loop_delay = 5000; // - delay between entire loops -
   unsigned int watering_frequencyH = 24; // - how often it's watered (in hours) -
   unsigned long watering_amount = 5000; // - how long the pump is activated for watering
@@ -82,6 +103,7 @@ class GrowingStation_smol{
 
   // +--+ telegram bot +--+
   UniversalTelegramBot* telegramBot = NULL;
+  bool wifiConnected = false;
 
 
   // +--+ users +--+
@@ -96,7 +118,7 @@ class GrowingStation_smol{
   unsigned int userCount = 0;
 
   
-  // - measurements -
+  // +--+ measurements +--+
   int temperature = 0;
   unsigned int humidity = 0;
   unsigned int soilHumidity = 0;
@@ -104,10 +126,12 @@ class GrowingStation_smol{
   
   // #---# TELEGRAM BOT #---#
   // #- various methods and functions for using the telegram bot -#
-  void begin(const String newBotToken, String chatID);
-  bool sendingLoop(String text, String *chatID, unsigned int reps = 5);
-  void handleMessages(unsigned int messageCount = 1);
-  bool isChatID(String chatID);
+  void tg_begin(const String newBotToken, String chatID);
+  TG_SENDING tg_send(String text, String *chatID = NULL, unsigned int reps = 5);
+  void wifiConnect(const char* ssid, const char* pswd);
+  bool tg_send(const char* text, String* chatID = NULL, unsigned int reps = 5);
+  void tg_handleMessages(unsigned int messageCount = 1);
+  bool tg_isChatID(String chatID);
 
   
   // #---# DHT-SENSOR #---#
@@ -120,9 +144,12 @@ class GrowingStation_smol{
   // #- various methods and functions about serial port checks, serial printing usw. -#
   bool debugAvailable();
   bool debugPrintln(const char* text);
-  bool debugPrint(const char* text);
   bool debugPrintln(int number);
+  bool debugPrintln(String text);
+
+  bool debugPrint(const char* text);
   bool debugPrint(int number);
+  bool debugPrint(String text);
 
   
   // #---# MISCELLANEOUS #---#

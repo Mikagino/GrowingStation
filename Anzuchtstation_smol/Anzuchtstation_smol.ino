@@ -42,6 +42,7 @@ GrowingStation_smol gsm;
 
 
 void setup() {
+<<<<<<< HEAD
 	bool setupFinished = false;
 	while (!setupFinished) {
 		// - setup tg-bot -
@@ -77,6 +78,18 @@ void setup() {
 #ifdef MANUAL_WATERING
 		pinMode(MANUAL_WATERING_INPUT, INPUT);
 #endif
+=======
+	pinMode(gpio.waterPump, OUTPUT);
+	dht.setup(DHT_PIN, DHTesp::DHT11);
+	gsm.tg_begin(BOT_TOKEN, BOT_CHATID);
+	gsm.wifiConnect(WIFI_SSID, WIFI_PASSWORD);
+
+	// - initial analog reading (if not done, measurements won't be correct the first times) -
+	analogSetCycles(127);
+	for (int i = 0; i < 3; i++) {
+		gsm.soilHumidity = analogRead(gpio.soilSensor);
+		delay(3000);
+>>>>>>> 2de77f86bc7f3e33010b8a7237a168d6b8294093
 	}
 }
 

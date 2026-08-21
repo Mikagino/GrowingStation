@@ -3,9 +3,56 @@
 
 
 /* ################################################################################
+ * #---# WIFI #---#
+ *
+ * various methods and functions for the WiFi with an ESP32 or ESP2866
+ * ################################################################################
+*/
+
+
+/**
+ *  DESCRIPTION: connect to the wifi
+ *
+ *  PARAM:
+ *    @ssid -> name of the wifi
+ *	  @pswd -> password of the wifi
+ */
+void GrowingStation_smol::wifiConnect(const char* ssid, const char* pswd) {
+	WiFi.begin(ssid, pswd);
+	while (!wifiConnected()) {
+		debugPrintln("WiFi try connecting...");
+		delay(1000);
+	}
+	debugPrintln("WiFi connected!");
+	wiFi_ssid = ssid;
+}
+
+
+
+/**
+ *  DESCRIPTION: test if you are connected to wifi
+ *
+ *  PARAM:
+ *    @ssid -> name of the wifi
+ *	  @pswd -> password of the wifi
+ */
+bool GrowingStation_smol::wifiConnected() {
+	if (WiFi.status() != WL_CONNECTED) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+
+
+
+
+/* ################################################################################
  * #---# TELEGRAM BOT #---#
  *
- * various methods and functions for using the telegram bot
+ * various methods and functions for using the telegram bot with an ESP32 or ESP2866
  * ################################################################################
 */
 
@@ -104,7 +151,10 @@ void GrowingStation_smol::wifiConnect(const char* ssid, const char* pswd) {
  *		-3 = BOT_NOT_SETUP
  */
 TG_SENDING GrowingStation_smol::tg_send(String text, String* chatID, unsigned int reps) {
-	if (telegramBot == NULL) {
+	if (!wifiConnected()) {
+		return WIFI_ERROR;
+	}
+	else if (telegramBot == NULL) {
 		return BOT_NOT_SETUP;
 	}
 	else {
@@ -141,7 +191,7 @@ TG_SENDING GrowingStation_smol::tg_send(String text, String* chatID, unsigned in
 		}
 	}
 	debugPrintln(" - ERROR: can't send message, failed looping! - ");
-	return SENDING_ERROR;
+	return LOOPING_ERROR;
 }
 
 
@@ -350,6 +400,36 @@ int GrowingStation_smol::tg_getChatID(String chatID) {
 
 
 /** # PRIVATE #
+ * DESCRIPTION: crop the command into its individual parts recursively [command]+[param1]+[param2]+[param3]...
+ *
+ * PARAM:
+ *	@fullCommand -> the command input by the user
+ *	@lastSpace -> [ENTER NOTHING], just for the recursion
+ *	@loop -> [ENTER NOTHING], just for recursion
+ *
+ * RETURNS:
+ *	int\{-1} -> amount of params
+ *	-1 -> no valid command entered
+ */
+int GrowingStation_smol::_cropCommand(const String fullCommand, int lastSpace, int loop) {
+	if (loop < COMMAND_MAX) {
+		if (loop == 0) {
+			_resetCommandArray();
+			fullCommand.trim();
+		}
+		int nextSpace = fullCommand.indexOf(" ");
+		fullCommand[loop] = fullCommand.substring(lastSpace, nextSpace);
+		int paramCount = _cropCommandRecursion(fullCommand, nextSpace, loop + 1);
+		return paramCount;
+	}
+	else {
+		return loop;
+	}
+}
+
+
+
+/** # PRIVATE #
  * DESCRIPTION: Reset the command array to its standard values
  */
 void GrowingStation_smol::_resetCommand() {
@@ -387,9 +467,9 @@ CMD_STATUS GrowingStation_smol::_cutCommand(String cmd, unsigned int loop) {
 
 
 /*################################################################################
- * #---# DHT-SENSOR #---#
+ * #---# SENSOR #---#
  *
- * various methods and functions for using an DHT-Sensor
+ * various methods and functions for using an DHT-Sensor and smooth analogReading
  *################################################################################
 */
 
@@ -438,6 +518,26 @@ int GrowingStation_smol::dht_readHumidity(DHTesp dht) {
 	else {
 		return humidity;
 	}
+}
+
+
+
+/**
+ *  DESCRIPTION: read analog value @samples times and average it
+ *
+ *  PARAM:
+ *    @pin -> the analog pin to be read
+ *    @samples -> amount of repititions
+ *
+ *  RETURN:
+ *   int -> smoothed analog reading
+ */
+int GrowingStation_smol::analogReadSmooth(unsigned int pin, unsigned int samples) {
+	for (int i = 0; i < samples && i < ANALOG_MAX_SAMPLES; i++) {
+		analogReads[i] = analogRead(pin);
+		delay(5);
+	}
+	return averageArray(analogReads, samples);
 }
 
 
